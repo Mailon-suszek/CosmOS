@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Cosm OS: construir + rodar",
+            "type": "shell",
+            "command": "bash ${workspaceFolder}/construcao.sh --run",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
