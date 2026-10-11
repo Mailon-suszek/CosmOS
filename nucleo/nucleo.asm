@@ -1,9 +1,11 @@
 ;==============================================================================
-; Cosm OS - Nucleo (nucleo-1.2.2026)
+; Cosm OS - Nucleo (nucleo-1.3.2026)
 ; org 0x0000 dentro do segmento 0x1000 (fisico 0x10000)
 ; prepara o hardware: modo de video via BIOS, A20, GDT,
 ; entra em modo protegido 32-bit, chama video.dr (0x8000) que configura a
 ; maior resolucao via VBE e retorna, e entrega o controle ao face.grain (0x20000)
+; que por sua vez executa o barsup.grain (0x30000), o barinf.grain (0x40000)
+; e o menu.grain (0x50000)
 ;==============================================================================
 [bits 16]
 [org 0x0000]

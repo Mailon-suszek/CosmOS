@@ -19,6 +19,15 @@ class Face {
             y = y + 1;
         }
 
+        // executa o barsup.grain (0x30000): barra superior branca
+        CosmOS.executar(0x30000);
+
+        // executa o barinf.grain (0x40000): barra inferior branca
+        CosmOS.executar(0x40000);
+
+        // executa o menu.grain (0x50000): retangulo cinza no lado direito
+        CosmOS.executar(0x50000);
+
         CosmOS.parar();
     }
 }

@@ -267,6 +267,7 @@ public class AOT {
         else if (name.equals("vbeInfo"))     { out.write(0x58); out.write(0xE8); writeCallRel(out, VBE_INFO); out.write(0x50); }
         else if (name.equals("vbeSetar"))    { out.write(0x58); out.write(0xE8); writeCallRel(out, VBE_SET); }
         else if (name.equals("parar"))       { out.write(0xFA); out.write(0xF4); }
+        else if (name.equals("executar"))    { out.write(0x58); out.write(0xFF); out.write(0xD0); }
         else throw new RuntimeException("intrinseco nao suportado: " + klass + "." + name);
     }
 

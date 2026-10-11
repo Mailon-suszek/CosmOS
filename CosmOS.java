@@ -13,6 +13,9 @@ class CosmOS {
     static int vbeInfo(int modo) { return 0; }
     static void vbeSetar(int modo) {}
 
+    // chama outro grain carregado em endereco fixo (o grain retorna com ret)
+    static void executar(int endereco) {}
+
     // encerra a CPU (cli; hlt)
     static void parar() {}
 }
