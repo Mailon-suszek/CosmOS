@@ -18,10 +18,6 @@ start:
     sti
     mov  [bootdrv], dl
 
-    call serial_init
-    mov  si, m_b1
-    call serial_print
-
     ; PVD (setor 16) -> 0x8000
     mov  si, 16
     mov  di, 0x8000
@@ -48,9 +44,6 @@ start:
     mov  di, 0x6000
     mov  si, ax
     call read_sector
-
-    mov  si, m_b3
-    call serial_print
 
     mov  dl, [bootdrv]
     jmp  0x0000:0x6000
@@ -81,8 +74,6 @@ read_sector:
 .ok:
     ret
 .err:
-    mov  si, m_err
-    call serial_print
     hlt
     jmp  .err
 
@@ -152,57 +143,7 @@ find_in_dir:
     ret
 
 ;---------------------------------------------------------------------------
-; serial COM1 16-bit (debug)
-;---------------------------------------------------------------------------
-serial_init:
-    push ax
-    push dx
-    mov  dx, 0x3FB
-    mov  al, 0x80
-    out  dx, al
-    mov  dx, 0x3F8
-    mov  al, 0x01
-    out  dx, al
-    mov  dx, 0x3F9
-    xor  al, al
-    out  dx, al
-    mov  dx, 0x3FB
-    mov  al, 0x03
-    out  dx, al
-    pop  dx
-    pop  ax
-    ret
-
-serial_print:
-    lodsb
-    or   al, al
-    jz   .done
-    call serial_char
-    jmp  serial_print
-.done:
-    ret
-
-serial_char:
-    push ax
-    push dx
-    mov  ah, al
-.sc_wait:
-    mov  dx, 0x3FD
-    in   al, dx
-    test al, 0x20
-    jz   .sc_wait
-    mov  al, ah
-    mov  dx, 0x3F8
-    out  dx, al
-    pop  dx
-    pop  ax
-    ret
-
-;---------------------------------------------------------------------------
 bootdrv:   db 0
-m_b1:      db "COSM[B1] lendo PVD/raiz", 13, 10, 0
-m_b3:      db "COSM[B1] inicio.cos em 0x6000", 13, 10, 0
-m_err:     db "COSM[B1] ERRO de leitura", 13, 10, 0
 nb_inicio: db 6, "inicio"
 nb_ic:     db 10, "inicio.cos"
 

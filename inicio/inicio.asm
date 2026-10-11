@@ -3,8 +3,9 @@
 ;   org 0x6000, modo real. Entra com DL = unidade de boot.
 ;   Le o CD (INT 13h AH=42h), navega a arvore ISO9660 (Rock Ridge 'NM')
 ;   e carrega arquivos SEPARADOS da ISO:
-;     /nucleo/nucleo-1.1.2026  -> 0x10000
+;     /nucleo/nucleo-1.2.2026  -> 0x10000
 ;     /interface/face.grain    -> 0x20000
+;     /drivers/video.dr        -> 0x08000
 ;   Depois pula para o nucleo em 0x1000:0x0000.
 ;----------------------------------------------------------------------------
 [org 0x6000]
@@ -20,13 +21,7 @@ start:
     sti
     mov  [bootdrv], dl
 
-    call serial_init
-    mov  si, m_s1
-    call serial_print
-
     ; ---- nucleo ----
-    mov  si, m_s2
-    call serial_print
     call load_cd_root
     mov  si, nb_nucleo + 1
     movzx cx, byte [nb_nucleo]
@@ -47,8 +42,6 @@ start:
     pop  es
 
     ; ---- face.grain ----
-    mov  si, m_s3
-    call serial_print
     call load_cd_root
     mov  si, nb_interface + 1
     movzx cx, byte [nb_interface]
@@ -68,8 +61,25 @@ start:
     call read_file
     pop  es
 
-    mov  si, m_sj
-    call serial_print
+    ; ---- video.dr (carrega por ultimo: usa 0x8000 como buffer) ----
+    call load_cd_root
+    mov  si, nb_drivers + 1
+    movzx cx, byte [nb_drivers]
+    call find_in_dir
+    mov  si, ax
+    mov  di, 0x8000
+    call read_sector
+    mov  si, nb_video + 1
+    movzx cx, byte [nb_video]
+    call find_in_dir
+    mov  si, ax
+    mov  cx, dx
+    push es
+    mov  ax, 0x0800
+    mov  es, ax
+    xor  di, di
+    call read_file
+    pop  es
 
     mov  dl, [bootdrv]
     jmp  0x1000:0x0000
@@ -131,8 +141,6 @@ read_sector:
 .ok:
     ret
 .err:
-    mov  si, m_errd
-    call serial_print
     hlt
     jmp  .err
 
@@ -201,60 +209,10 @@ find_in_dir:
     ret
 
 ;---------------------------------------------------------------------------
-; serial COM1 16-bit (debug)
-;---------------------------------------------------------------------------
-serial_init:
-    push ax
-    push dx
-    mov  dx, 0x3FB
-    mov  al, 0x80
-    out  dx, al
-    mov  dx, 0x3F8
-    mov  al, 0x01
-    out  dx, al
-    mov  dx, 0x3F9
-    xor  al, al
-    out  dx, al
-    mov  dx, 0x3FB
-    mov  al, 0x03
-    out  dx, al
-    pop  dx
-    pop  ax
-    ret
-
-serial_print:
-    lodsb
-    or   al, al
-    jz   .done
-    call serial_char
-    jmp  serial_print
-.done:
-    ret
-
-serial_char:
-    push ax
-    push dx
-    mov  ah, al
-.sc_wait:
-    mov  dx, 0x3FD
-    in   al, dx
-    test al, 0x20
-    jz   .sc_wait
-    mov  al, ah
-    mov  dx, 0x3F8
-    out  dx, al
-    pop  dx
-    pop  ax
-    ret
-
-;---------------------------------------------------------------------------
 bootdrv:       db 0
-m_s1:          db "COSM[S2] stage2 ok, lendo CD", 13, 10, 0
-m_s2:          db "COSM[S2] carregando nucleo-1.1.2026", 13, 10, 0
-m_s3:          db "COSM[S2] carregando face.grain", 13, 10, 0
-m_sj:          db "COSM[S2] ->J para 0x10000", 13, 10, 0
-m_errd:        db "COSM[S2] ERRO de leitura", 13, 10, 0
 nb_nucleo:     db 6, "nucleo"
 nb_interface:  db 9, "interface"
-nb_n1:         db 15, "nucleo-1.1.2026"
+nb_n1:         db 15, "nucleo-1.2.2026"
 nb_face:       db 10, "face.grain"
+nb_drivers:    db 7, "drivers"
+nb_video:      db 8, "video.dr"
