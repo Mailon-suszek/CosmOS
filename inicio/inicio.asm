@@ -3,12 +3,13 @@
 ;   org 0x6000, modo real. Entra com DL = unidade de boot.
 ;   Le o CD (INT 13h AH=42h), navega a arvore ISO9660 (Rock Ridge 'NM')
 ;   e carrega arquivos SEPARADOS da ISO:
-;     /nucleo/nucleo-1.3.2026  -> 0x10000
+;     /nucleo/nucleo-1.4.2026  -> 0x10000
 ;     /interface/face.grain    -> 0x20000
 ;     /interface/brasup.grain  -> 0x30000
 ;     /interface/barinf.grain  -> 0x40000
 ;     /interface/menu.grain    -> 0x50000
 ;     /drivers/video.dr        -> 0x08000
+;     /drivers/mouse.dr        -> 0x60000
 ;   Depois pula para o nucleo em 0x1000:0x0000.
 ;----------------------------------------------------------------------------
 [org 0x6000]
@@ -98,6 +99,26 @@ start:
     mov  cx, dx
     push es
     mov  ax, 0x5000
+    mov  es, ax
+    xor  di, di
+    call read_file
+    pop  es
+
+    ; ---- mouse.dr (cursor, carregado em 0x60000) ----
+    call load_cd_root
+    mov  si, nb_drivers + 1
+    movzx cx, byte [nb_drivers]
+    call find_in_dir
+    mov  si, ax
+    mov  di, 0x8000
+    call read_sector
+    mov  si, nb_mouse + 1
+    movzx cx, byte [nb_mouse]
+    call find_in_dir
+    mov  si, ax
+    mov  cx, dx
+    push es
+    mov  ax, 0x6000
     mov  es, ax
     xor  di, di
     call read_file
@@ -254,10 +275,11 @@ find_in_dir:
 bootdrv:       db 0
 nb_nucleo:     db 6, "nucleo"
 nb_interface:  db 9, "interface"
-nb_n1:         db 15, "nucleo-1.3.2026"
+nb_n1:         db 15, "nucleo-1.4.2026"
 nb_face:       db 10, "face.grain"
 nb_brasup:     db 12, "brasup.grain"
 nb_barinf:     db 12, "barinf.grain"
 nb_menu:       db 10, "menu.grain"
 nb_drivers:    db 7, "drivers"
 nb_video:      db 8, "video.dr"
+nb_mouse:      db 8, "mouse.dr"

@@ -28,6 +28,12 @@ class Face {
         // executa o menu.grain (0x50000): retangulo cinza no lado direito
         CosmOS.executar(0x50000);
 
-        CosmOS.parar();
+        // loop de quadros: le o mouse (mouse_poll no nucleo, via 0x15020) e
+        // redesenha o cursor (mouse.dr em 0x60000) por cima de tudo
+        int poll = CosmOS.ler32(0x15020);
+        while (true) {
+            CosmOS.executar(poll);
+            CosmOS.executar(0x60000);
+        }
     }
 }

@@ -175,6 +175,7 @@ public class AOT {
             case 0x68: out.write(0x5B); out.write(0x58);
                        out.write(0x0F); out.write(0xAF); out.write(0xC3);
                        out.write(0x50); break;          // imul
+            case 0x74: out.write(0x58); out.write(0xF7); out.write(0xD8); out.write(0x50); break; // ineg (neg eax)
             case 0x78: shiftOp(out, 0xE0); break;        // ishl
             case 0x7C: shiftOp(out, 0xE8); break;        // iushr
             case 0x7E: binOp(out, 0x21, 0xD8); break;    // iand
